@@ -21,7 +21,10 @@ features = [
 #    "jet_phi_0", "jet_phi_1"
 ]
 
-# @@ Exercise: feafure engineering
+# %%%Exercise%%%
+# Feafure engineering:
+# Add jet eta and phi? Do the values make sense?
+# Add more features? (invariant mass, angular separation, etc.)
 
 # Target label
 target = dataset["label"]
@@ -59,6 +62,16 @@ if do_bdt:
     feature_importance(bdt, dataset_train.columns, output_dir=outdir_bdt)
     plot_learning_curve(X_train, y_train, w_train, output_dir=outdir_bdt)
 
+    # %%% Exercise %%%
+    # Hyperparameter tuning:
+    # - Try different values for `max_depth`, `n_estimators`, `learning_rate`
+    # - Use `GridSearchCV` or `RandomizedSearchCV` from `sklearn` to find the best parameters
+
+    # %%% Exercise %%%
+    # Try other BDT implementations:
+    # - `SKLearn`'s `GBDT`
+    # - `LightGBM`
+
 ###
 # Neural network
 do_nn = True
@@ -67,3 +80,8 @@ if do_nn:
     outdir_mlp = 'mlp'
     mlp = train_mlp(X_train, X_val, y_train, y_val, w_train, w_val, output_dir=outdir_mlp)
     evaluate_mlp(mlp, X_train, X_test, y_train, y_test, w_train, w_test, output_dir=outdir_mlp)
+
+# %%% Exercise %%%
+# Compare the performance of different models:
+# - Compare the AUC scores of BDT and MLP models
+# - Compare the training time of BDT and MLP models
