@@ -30,6 +30,27 @@ def plot_features(features_df, target, weights):
     for a in ax:
         a.legend()
 
+def plot_correlations(features_df, target):
+    fig, axes = plt.subplots(1, 2, figsize=(20, 10))
+
+    corr_sig = features_df[target==1].corr()
+    im0 = axes[0].imshow(corr_sig, cmap='coolwarm', vmin=-1, vmax=1)
+    axes[0].set_title('Signal Correlation Matrix')
+    axes[0].set_xticks(range(len(corr_sig.columns)))
+    axes[0].set_xticklabels(corr_sig.columns, rotation=90)
+    axes[0].set_yticks(range(len(corr_sig.columns)))
+    axes[0].set_yticklabels(corr_sig.columns)
+    fig.colorbar(im0, ax=axes[0])
+
+    corr_bkg = features_df[target==0].corr()
+    im1 = axes[1].imshow(corr_bkg, cmap='coolwarm', vmin=-1, vmax=1)
+    axes[1].set_title('Background Correlation Matrix')
+    axes[1].set_xticks(range(len(corr_bkg.columns)))
+    axes[1].set_xticklabels(corr_bkg.columns, rotation=90)
+    axes[1].set_yticks(range(len(corr_bkg.columns)))
+    axes[1].set_yticklabels(corr_bkg.columns)
+    fig.colorbar(im1, ax=axes[1])
+
 def plot_training_history(training_loss, validation_loss, num_epochs):
     plt.figure()
     plt.plot(range(1, num_epochs + 1), [training_loss.item()] * num_epochs, label='Training Loss')

@@ -12,7 +12,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 
 import matplotlib.pyplot as plt
-from plotting import plot_features, plot_training_history, plot_train_vs_test, plot_roc_curve
+from plotting import plot_features, plot_correlations, plot_training_history, plot_train_vs_test, plot_roc_curve
 from dataset import load_dataset
 
 ######
@@ -47,9 +47,9 @@ print(dataset_train.head())
 # plot features
 plot_features(dataset_train, target, weights)
 plt.savefig('features.png')
-# TODO
-# distributions, correlations
-# also weights
+
+plot_correlations(dataset_train, target)
+plt.savefig('correlations.png')
 
 ######
 # Preprocess data
