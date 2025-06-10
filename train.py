@@ -17,8 +17,8 @@ features = [
     "lep_phi_0", "lep_phi_1",
     "jet_n",
     "jet_pt_0", "jet_pt_1", 
-    "jet_eta_0", "jet_eta_1",
-    "jet_phi_0", "jet_phi_1"
+#    "jet_eta_0", "jet_eta_1",
+#    "jet_phi_0", "jet_phi_1"
 ]
 
 # @@ Exercise: feafure engineering
