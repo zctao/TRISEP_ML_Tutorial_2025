@@ -82,3 +82,18 @@ def evaluate_bdt(
         ['Train', 'Test']
     )
     plt.savefig(os.path.join(output_dir, 'roc_curve.png'))
+
+def feature_importance(model, feature_names, output_dir='bdt'):
+    """
+    Plot feature importance from the trained BDT model.
+    """
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    plt.figure()
+    sorted_idx = model.feature_importances_.argsort()
+    plt.barh(feature_names[sorted_idx], model.feature_importances_[sorted_idx])
+    plt.xlabel('Feature Importance')
+    plt.title('Feature Importance from BDT')
+    plt.savefig(os.path.join(output_dir, 'feature_importance.png'))
+    plt.close()
