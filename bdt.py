@@ -85,6 +85,12 @@ def evaluate_bdt(
     )
     plt.savefig(os.path.join(output_dir, 'roc_curve.png'))
 
+    # plot confusion matrix
+    cm_train = confusion_matrix(y_train, (y_pred_train > 0.5).astype(int), sample_weight=w_train.values)
+    cm_test = confusion_matrix(y_test, (y_pred_test > 0.5).astype(int), sample_weight=w_test.values)
+    plot_confusion_matrix(cm_train, cm_test)
+    plt.savefig(os.path.join(output_dir, 'confusion_matrix.png'))
+
 def feature_importance(model, feature_names, output_dir='bdt'):
     """
     Plot feature importance from the trained BDT model.
