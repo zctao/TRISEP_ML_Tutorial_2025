@@ -11,9 +11,9 @@ from sklearn.model_selection import StratifiedKFold
 from plotting import plot_train_vs_test, plot_roc_curve
 
 def train_bdt(
-    X_train, X_val,
-    y_train, y_val,
-    w_train, w_val,
+    X_train,
+    y_train,
+    w_train,
     output_dir='bdt'
     ):
     # output directory

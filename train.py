@@ -57,7 +57,7 @@ do_bdt = True
 if do_bdt:
     from bdt import train_bdt, evaluate_bdt, feature_importance, plot_learning_curve
     outdir_bdt = 'bdt'
-    bdt = train_bdt(X_train, X_val, y_train, y_val, w_train, w_val, output_dir=outdir_bdt)
+    bdt = train_bdt(X_train, y_train, w_train, output_dir=outdir_bdt)
     evaluate_bdt(bdt, X_train, X_test, y_train, y_test, w_train, w_test, output_dir=outdir_bdt)
     feature_importance(bdt, dataset_train.columns, output_dir=outdir_bdt)
     plot_learning_curve(X_train, y_train, w_train, output_dir=outdir_bdt)
