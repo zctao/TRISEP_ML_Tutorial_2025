@@ -1,10 +1,12 @@
 import os
 import time
 import matplotlib.pyplot as plt
+import numpy as np
 
 from xgboost import XGBClassifier
 
 from sklearn.metrics import roc_curve, auc
+from sklearn.model_selection import StratifiedKFold
 
 from plotting import plot_train_vs_test, plot_roc_curve
 
@@ -97,3 +99,51 @@ def feature_importance(model, feature_names, output_dir='bdt'):
     plt.title('Feature Importance from BDT')
     plt.savefig(os.path.join(output_dir, 'feature_importance.png'))
     plt.close()
+
+def plot_learning_curve(
+    X_train, y_train, w_train,
+    output_dir='bdt'
+    ):
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    xgb = XGBClassifier(
+        tree_method='hist',
+        eval_metric='logloss'
+    )
+
+    train_sizes = np.linspace(0.1, 1.0, 6)
+    train_scores = []
+    val_scores = []
+
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+    for frac in train_sizes:
+        n_train = int(frac * len(X_train))
+        X_sub = X_train[:n_train]
+        y_sub = y_train[:n_train]
+        w_sub = w_train[:n_train]
+
+        train_score = []
+        val_score = []
+
+        for train_idx, val_idx in skf.split(X_sub, y_sub):
+            X_tr, X_val = X_sub[train_idx], X_sub[val_idx]
+            y_tr, y_val = y_sub[train_idx], y_sub[val_idx]
+            w_tr, w_val = w_sub[train_idx], w_sub[val_idx]
+
+            xgb.fit(X_tr, y_tr, sample_weight=w_tr)
+            train_score.append(xgb.score(X_tr, y_tr, sample_weight=w_tr))
+            val_score.append(xgb.score(X_val, y_val, sample_weight=w_val))
+
+        train_scores.append(np.mean(train_score))
+        val_scores.append(np.mean(val_score))
+
+    plt.figure()
+    plt.plot(train_sizes, train_scores, label='Training Score')
+    plt.plot(train_sizes, val_scores, label='Validation Score')
+    plt.xlabel('Training Size (fraction)')
+    plt.ylabel('Score')
+    plt.title('Learning Curve')
+    plt.legend()
+    plt.savefig(os.path.join(output_dir, 'learning_curve.png'))
