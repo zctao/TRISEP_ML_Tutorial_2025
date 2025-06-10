@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from plotting import plot_features, plot_correlations
 from dataset import load_dataset, preprocess_dataset
-from mlp import train_mlp, evaluate_mlp
 
 ######
 ## Load data
@@ -50,7 +49,19 @@ X_train, X_val, X_test, y_train, y_val, y_test, w_train, w_val, w_test = preproc
 ######
 # Train model
 ###
+# Boosted decision trees
+do_bdt = True
+if do_bdt:
+    from bdt import train_bdt, evaluate_bdt
+    outdir_bdt = 'bdt'
+    bdt = train_bdt(X_train, X_val, y_train, y_val, w_train, w_val, output_dir=outdir_bdt)
+    evaluate_bdt(bdt, X_train, X_test, y_train, y_test, w_train, w_test, output_dir=outdir_bdt)
+
+###
 # Neural network
-outdir_mlp = 'mlp'
-mlp = train_mlp(X_train, X_val, y_train, y_val, w_train, w_val, output_dir=outdir_mlp)
-evaluate_mlp(mlp, X_train, X_test, y_train, y_test, w_train, w_test, output_dir=outdir_mlp)
+do_nn = True
+if do_nn:
+    from mlp import train_mlp, evaluate_mlp
+    outdir_mlp = 'mlp'
+    mlp = train_mlp(X_train, X_val, y_train, y_val, w_train, w_val, output_dir=outdir_mlp)
+    evaluate_mlp(mlp, X_train, X_test, y_train, y_test, w_train, w_test, output_dir=outdir_mlp)
