@@ -1,9 +1,6 @@
 import time
-import uproot
 import pandas as pd
 
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import roc_curve, auc
 
 import torch
@@ -13,7 +10,7 @@ from torch.utils.data import DataLoader, TensorDataset
 
 import matplotlib.pyplot as plt
 from plotting import plot_features, plot_correlations, plot_training_history, plot_train_vs_test, plot_roc_curve
-from dataset import load_dataset
+from dataset import load_dataset, preprocess_dataset
 
 ######
 ## Load data
@@ -55,41 +52,7 @@ plt.savefig('correlations.png')
 # Preprocess data
 # split dataset into training and test sets
 test_size = 0.25  # 25% of the data will be used for testing
-X_train, X_test, y_train, y_test, w_train, w_test = train_test_split(
-    dataset_train, target, weights, test_size=test_size
-)
-
-y_train = y_train.reset_index(drop=True)
-y_test = y_test.reset_index(drop=True)
-w_train = w_train.reset_index(drop=True)
-w_test = w_test.reset_index(drop=True)
-
-print(f"X_train shape: {X_train.shape}, y_train shape: {y_train.shape}, w_train shape: {w_train.shape}")
-print(f"X_test shape: {X_test.shape}, y_test shape: {y_test.shape}, w_test shape: {w_test.shape}")
-
-# further split test set into validation and test sets
-
-X_val, X_test, y_val, y_test, w_val, w_test = train_test_split(
-    X_test, y_test, w_test, test_size=0.5
-)
-
-# Standardize features
-# scale to mean of 0 and standard deviation of 1
-scaler = StandardScaler()
-X_train = scaler.fit_transform(X_train)
-X_val = scaler.transform(X_val)
-X_test = scaler.transform(X_test)
-
-# Adjust event weights: train on equal amount of signal and background events; test with original weights
-class_weights_train = (w_train[y_train == 0].sum(), w_train[y_train == 1].sum())
-print(f"class_weights_train: Background, Signal = {class_weights_train}")
-
-for i in range(len(class_weights_train)):
-    w_train[y_train == i] *= max(class_weights_train) / class_weights_train[i] #equalize number of background and signal event
-    w_test[y_test == i] *= 1/test_size/0.5  #increase test weight to compensate for sampling
-
-print(f"Train weights: Background, Signal = {w_train[y_train == 0].sum()}, {w_train[y_train == 1].sum()}")
-print(f"Test weights: Background, Signal = {w_test[y_test == 0].sum()}, {w_test[y_test == 1].sum()}")
+X_train, X_val, X_test, y_train, y_val, y_test, w_train, w_val, w_test = preprocess_dataset(dataset_train, target, weights, test_size=test_size)
 
 ######
 # Train model
