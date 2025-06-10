@@ -70,6 +70,8 @@ print(f"Training dataset shape: {dataset_train.shape}")
 print(dataset_train.head())
 
 # plot features
+plot_features(dataset_train, target, weights)
+plt.savefig('features.png')
 # TODO
 # distributions, correlations
 # also weights

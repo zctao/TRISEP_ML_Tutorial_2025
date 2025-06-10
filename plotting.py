@@ -1,6 +1,35 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+def plot_features(features_df, target, weights):
+    plt.figure()
+    # background distributions
+    ax = features_df[target==0].hist(
+        weights=weights[target==0],
+        figsize=(15,12),
+        color='blue',
+        alpha=0.5, 
+        density=True,
+        label='Background'
+    )
+
+    ax = ax.flatten()[:features_df.shape[1]]
+
+    # signal distributions
+    features_df[target==1].hist(
+        weights=weights[target==1],
+        figsize=(15,12),
+        color='red',
+        alpha=0.5,
+        density=True,
+        ax=ax,
+        label='Signal'
+    )
+
+    # add legends
+    for a in ax:
+        a.legend()
+
 def plot_training_history(training_loss, validation_loss, num_epochs):
     plt.figure()
     plt.plot(range(1, num_epochs + 1), [training_loss.item()] * num_epochs, label='Training Loss')
