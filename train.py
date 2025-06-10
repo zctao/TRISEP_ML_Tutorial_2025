@@ -12,42 +12,12 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 
 import matplotlib.pyplot as plt
-from plotting import plot_training_history, plot_train_vs_test, plot_roc_curve
+from plotting import plot_features, plot_training_history, plot_train_vs_test, plot_roc_curve
+from dataset import load_dataset
 
 ######
 ## Load data
-filename = "dataWW_d1.root"
-treename = "tree_event"
-with uproot.open(filename) as file:
-    tree = file[treename]
-    # load events as pandas DataFrame
-    dataset = tree.arrays(library="pd")
-    print(f"Loaded {len(dataset)} events from {filename}.")
-
-# shuffle data
-dataset = dataset.sample(frac=1).reset_index(drop=True)
-
-######
-# Examine dataset
-# Print first few events
-#print(dataset.head())
-
-# Print dataset statistics
-#print(dataset.describe())
-
-label_weights = ( dataset[dataset.label==0].mcWeight.sum(), dataset[dataset.label==1].mcWeight.sum() )
-print(f"Sum of label weights: Background, Signal = {label_weights}")
-
-label_nevents = ( dataset[dataset.label==0].shape[0], dataset[dataset.label==1].shape[0] )
-print(f"Total class number of events: Background, Signal = {label_nevents}")
-
-######
-# Event selection
-# Select events with exactly 2 leptons
-print(f"Dataset shape before selection: {dataset.shape}")
-# And only events with positive weights
-dataset_selected = dataset[ (dataset.lep_n == 2) & (dataset.mcWeight > 0) ]
-print(f"Dataset shape after selection: {dataset_selected.shape}")
+dataset = load_dataset("dataWW_d1.root", "tree_event")
 
 ######
 # Features to train on
@@ -62,10 +32,15 @@ features = [
     "jet_phi_0", "jet_phi_1"
 ]
 
-target = dataset_selected["label"]
-weights = dataset_selected["mcWeight"]
+# @@ Exercise: feafure engineering
 
-dataset_train = pd.DataFrame(dataset_selected, columns=features)
+# Target label
+target = dataset["label"]
+# Event weights
+weights = dataset["mcWeight"]
+
+# Make the datafram with selected features for training
+dataset_train = pd.DataFrame(dataset, columns=features)
 print(f"Training dataset shape: {dataset_train.shape}")
 print(dataset_train.head())
 
