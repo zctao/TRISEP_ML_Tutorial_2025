@@ -57,11 +57,21 @@ do_bdt = True
 if do_bdt:
     from bdt import train_bdt, evaluate_bdt, feature_importance, feature_permutation, plot_learning_curve, hyperparameter_tuning
     outdir_bdt = 'bdt'
+
+    # Train the BDT model
     bdt = train_bdt(X_train, y_train, w_train, output_dir=outdir_bdt)
+
+    # Evaluate the BDT model
     evaluate_bdt(bdt, X_train, X_test, y_train, y_test, w_train, w_test, output_dir=outdir_bdt)
+
+    # Feature importance
     feature_importance(bdt, dataset_train.columns, output_dir=outdir_bdt)
     feature_permutation(bdt, dataset_train.columns, X_test, y_test, w_test, output_dir=outdir_bdt)
+
+    # Learning curve
     plot_learning_curve(X_train, y_train, w_train, output_dir=outdir_bdt)
+
+    # Hyperparameter tuning
     hyperparameter_tuning(X_train, y_train, w_train, X_test, y_test, w_test)
 
     # %%% Exercise %%%
