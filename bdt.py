@@ -2,13 +2,16 @@ import os
 import time
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 from xgboost import XGBClassifier
 
-from sklearn.metrics import roc_curve, auc
-from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import roc_curve, auc, roc_auc_score, confusion_matrix
+from sklearn.inspection import permutation_importance
+from sklearn.model_selection import StratifiedKFold, RandomizedSearchCV, GridSearchCV
+import scipy.stats as stats
 
-from plotting import plot_train_vs_test, plot_roc_curve
+from plotting import plot_train_vs_test, plot_roc_curve, plot_confusion_matrix
 
 def train_bdt(
     X_train,
@@ -173,3 +176,36 @@ def plot_learning_curve(
     plt.title('Learning Curve')
     plt.legend()
     plt.savefig(os.path.join(output_dir, 'learning_curve.png'))
+
+def hyperparameter_tuning(
+    X_train, y_train, w_train,
+    X_test, y_test, w_test,
+    ):
+    """
+    Perform hyperparameter tuning for the BDT model.
+    """
+    print("Starting hyperparameter tuning...")
+    # specify parameters, range, and distributions to sample from
+    param_dist_XGB = {
+        'max_depth': stats.randint(3, 12), # default 6
+        'n_estimators': stats.randint(300, 800), #default 100
+        'learning_rate': stats.uniform(0.1, 0.5), #def 0.3
+    }
+
+    gsearch = RandomizedSearchCV(
+        estimator = XGBClassifier(tree_method="hist",eval_metric='logloss'),
+        param_distributions = param_dist_XGB,
+        scoring='roc_auc',
+        n_iter=10,
+        cv=2
+    )
+
+    gsearch.fit(X_train, y_train.values, sample_weight=w_train.values)
+
+    print("Best parameters found: ", gsearch.best_params_)
+    print("Best score: ", gsearch.best_score_)
+
+    y_pred_test = gsearch.predict_proba(X_test)[:, 1].ravel()
+    print("Score on test dataset: ",roc_auc_score(y_true=y_test.values, y_score=y_pred_test, sample_weight=w_test.values))
+    dfsearch=pd.DataFrame.from_dict(gsearch.cv_results_)
+    print(dfsearch)

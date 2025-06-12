@@ -55,13 +55,14 @@ X_train, X_val, X_test, y_train, y_val, y_test, w_train, w_val, w_test = preproc
 # Boosted decision trees
 do_bdt = True
 if do_bdt:
-    from bdt import train_bdt, evaluate_bdt, feature_importance, feature_permutation, plot_learning_curve
+    from bdt import train_bdt, evaluate_bdt, feature_importance, feature_permutation, plot_learning_curve, hyperparameter_tuning
     outdir_bdt = 'bdt'
     bdt = train_bdt(X_train, y_train, w_train, output_dir=outdir_bdt)
     evaluate_bdt(bdt, X_train, X_test, y_train, y_test, w_train, w_test, output_dir=outdir_bdt)
     feature_importance(bdt, dataset_train.columns, output_dir=outdir_bdt)
     feature_permutation(bdt, dataset_train.columns, X_test, y_test, w_test, output_dir=outdir_bdt)
     plot_learning_curve(X_train, y_train, w_train, output_dir=outdir_bdt)
+    hyperparameter_tuning(X_train, y_train, w_train, X_test, y_test, w_test)
 
     # %%% Exercise %%%
     # Hyperparameter tuning:
