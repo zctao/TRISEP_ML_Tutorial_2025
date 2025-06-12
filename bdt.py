@@ -106,6 +106,26 @@ def feature_importance(model, feature_names, output_dir='bdt'):
     plt.savefig(os.path.join(output_dir, 'feature_importance.png'))
     plt.close()
 
+def feature_permutation(model, feature_names, X, y, w, output_dir='bdt'):
+    """
+    Compute and plot feature permutation importance.
+    """
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    result = permutation_importance(
+        model, X, y, sample_weight=w.values,
+        scoring='roc_auc', n_repeats=1, random_state=42, n_jobs=-1
+    )
+
+    sorted_idx = result.importances_mean.argsort()
+    plt.figure()
+    plt.barh(feature_names[sorted_idx], result.importances_mean[sorted_idx])
+    plt.xlabel('Permutation Importance')
+    plt.title('Feature Permutation Importance from BDT')
+    plt.savefig(os.path.join(output_dir, 'feature_permutation_importance.png'))
+    plt.close()
+
 def plot_learning_curve(
     X_train, y_train, w_train,
     output_dir='bdt'
