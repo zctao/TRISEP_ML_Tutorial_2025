@@ -50,11 +50,26 @@ def train_mlp(
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     # Training loop
+    # Train on GPU if available
+    if torch.cuda.is_available():
+        model.to('cuda')
+        X_train_tensor = X_train_tensor.to('cuda')
+        y_train_tensor = y_train_tensor.to('cuda')
+        w_train_tensor = w_train_tensor.to('cuda')
+        X_val_tensor = X_val_tensor.to('cuda')
+        y_val_tensor = y_val_tensor.to('cuda')
+        w_val_tensor = w_val_tensor.to('cuda')
+
+    device = next(model.parameters()).device
+
     starting_time = time.time()
 
     for epoch in range(num_epochs):
         model.train()
         for X_batch, y_batch, w_batch in train_loader:
+            # Move data to the appropriate device
+            X_batch, y_batch, w_batch = X_batch.to(device), y_batch.to(device), w_batch.to(device)
+
             # Forward pass
             outputs = model(X_batch).squeeze()
             loss = loss_fn(outputs, y_batch.float())
@@ -72,7 +87,7 @@ def train_mlp(
             val_loss = loss_fn(val_outputs, y_val_tensor.float())
             weighted_val_loss = (val_loss * w_val_tensor).mean()  # Apply weights to the loss
 
-        print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {weighted_loss.item():.8f}, Validation Loss: {weighted_val_loss.item():.8f}")
+        print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {weighted_loss.detach().item():.8f}, Validation Loss: {weighted_val_loss.detach().item():.8f}")
 
     training_time = time.time() - starting_time
     print(f"Training time: {training_time} seconds")
@@ -106,8 +121,17 @@ def evaluate_mlp(
     y_test_tensor = torch.tensor(y_test.values, dtype=torch.long)
     w_test_tensor = torch.tensor(w_test.values, dtype=torch.float32)
 
-    y_pred_train = model(X_train_tensor).detach().numpy().ravel()
-    y_pred_test = model(X_test_tensor).detach().numpy().ravel()
+    # Move model to GPU if available
+    if torch.cuda.is_available():
+        model.to('cuda')
+        X_train_tensor_gpu = X_train_tensor.to('cuda')
+        X_test_tensor_gpu = X_test_tensor.to('cuda')
+
+        y_pred_train = model(X_train_tensor_gpu).detach().cpu().numpy().ravel()
+        y_pred_test = model(X_test_tensor_gpu).detach().cpu().numpy().ravel()
+    else:
+        y_pred_train = model(X_train_tensor).detach().numpy().ravel()
+        y_pred_test = model(X_test_tensor).detach().numpy().ravel()
 
     # plot train vs test
     plot_train_vs_test(
