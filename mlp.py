@@ -1,13 +1,14 @@
 import os
 import time
 import matplotlib.pyplot as plt
+import numpy as np
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 
-from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import roc_curve, auc, roc_auc_score
 
 from plotting import plot_training_history, plot_train_vs_test, plot_roc_curve
 
@@ -165,3 +166,41 @@ def evaluate_mlp(
         labels=['Train', 'Test']
     )
     plt.savefig(os.path.join(output_dir, 'roc_curve.png'))
+
+def feature_importance(model, feature_names, X, y, w, output_dir='mlp'):
+    # evaluate feature importance using permutation importance
+
+    model.eval()
+    device = next(model.parameters()).device
+
+    X_orig = X.copy()
+
+    # Baseline score
+    X_tensor = torch.tensor(X_orig, dtype=torch.float32).to(device)
+    with torch.no_grad():
+        y_pred = model(X_tensor).detach().cpu().numpy().ravel()
+    baseline = roc_auc_score(y.values, y_pred, sample_weight=w.values)
+
+    importances = []
+    for i, vname in enumerate(feature_names):
+        X_permuted = X_orig.copy()
+        X_permuted[:, i] = np.random.permutation(X_permuted[:, i])
+        X_tensor_perm = torch.tensor(X_permuted, dtype=torch.float32).to(device)
+        with torch.no_grad():
+            y_pred_perm = model(X_tensor_perm).detach().cpu().numpy().ravel()
+        score = roc_auc_score(y.values, y_pred_perm, sample_weight=w.values)
+        importances.append(baseline - score)
+
+    importances = np.array(importances)
+    sorted_idx = np.argsort(importances)
+
+    # Plot feature importance
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    plt.figure()
+    plt.barh(np.array(feature_names)[sorted_idx], importances[sorted_idx])
+    plt.xlabel('Permutation Importance')
+    plt.title('Permutation Importance from MLP')
+    plt.savefig(os.path.join(output_dir, 'feature_importance.png'))
+    plt.close()
