@@ -42,7 +42,7 @@ def preprocess_dataset(features_df, target, weights, test_size=0.25):
     """
     # Split dataset into training and test sets
     X_train, X_test, y_train, y_test, w_train, w_test = train_test_split(
-        features_df, target, weights, test_size=test_size
+        features_df, target, weights, test_size=test_size, shuffle=True
     )
 
     y_train = y_train.reset_index(drop=True)
@@ -50,13 +50,14 @@ def preprocess_dataset(features_df, target, weights, test_size=0.25):
     w_train = w_train.reset_index(drop=True)
     w_test = w_test.reset_index(drop=True)
 
-    print(f"X_train shape: {X_train.shape}, y_train shape: {y_train.shape}, w_train shape: {w_train.shape}")
-    print(f"X_test shape: {X_test.shape}, y_test shape: {y_test.shape}, w_test shape: {w_test.shape}")
-
     # Further split test set into validation and test sets
     X_val, X_test, y_val, y_test, w_val, w_test = train_test_split(
-        X_test, y_test, w_test, test_size=0.5
+        X_test, y_test, w_test, test_size=0.5, shuffle=True
     )
+
+    print(f"X_train shape: {X_train.shape}, y_train shape: {y_train.shape}, w_train shape: {w_train.shape}")
+    print(f"X_val shape: {X_val.shape}, y_val shape: {y_val.shape}, w_val shape: {w_val.shape}")
+    print(f"X_test shape: {X_test.shape}, y_test shape: {y_test.shape}, w_test shape: {w_test.shape}")
 
     # Standardize the features
     # scale to mean=0, std=1
@@ -73,6 +74,7 @@ def preprocess_dataset(features_df, target, weights, test_size=0.25):
         w_test[y_test == i] *= 1 / test_size / 0.5  # increase test weight to compensate for sampling
 
     print(f"Train weights: Background, Signal = {w_train[y_train == 0].sum()}, {w_train[y_train == 1].sum()}")
+    print(f"Validation weights: Background, Signal = {w_val[y_val == 0].sum()}, {w_val[y_val == 1].sum()}")
     print(f"Test weights: Background, Signal = {w_test[y_test == 0].sum()}, {w_test[y_test == 1].sum()}")
 
     return X_train, X_val, X_test, y_train, y_val, y_test, w_train, w_val, w_test
