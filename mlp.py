@@ -123,11 +123,10 @@ def evaluate_mlp(
     w_test_tensor = torch.tensor(w_test.values, dtype=torch.float32)
 
     # Move model to GPU if available
-    if torch.cuda.is_available():
-        model.to('cuda')
+    device = next(model.parameters()).device
+    if device.type == 'cuda':
         X_train_tensor_gpu = X_train_tensor.to('cuda')
         X_test_tensor_gpu = X_test_tensor.to('cuda')
-
         y_pred_train = model(X_train_tensor_gpu).detach().cpu().numpy().ravel()
         y_pred_test = model(X_test_tensor_gpu).detach().cpu().numpy().ravel()
     else:
