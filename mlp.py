@@ -66,6 +66,9 @@ def train_mlp(
 
     device = next(model.parameters()).device
 
+    training_loss_history = []
+    validation_loss_history = []
+
     starting_time = time.time()
 
     for epoch in range(num_epochs):
@@ -98,6 +101,8 @@ def train_mlp(
             weighted_val_loss = (val_loss * w_val_tensor).mean()  # Apply weights to the loss
             weighted_val_loss = weighted_val_loss.detach().item()  # Convert to scalar
 
+        training_loss_history.append(weighted_train_loss)
+        validation_loss_history.append(weighted_val_loss)
         print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {weighted_train_loss:.8f}, Validation Loss: {weighted_val_loss:.8f}")
 
     training_time = time.time() - starting_time
@@ -107,7 +112,7 @@ def train_mlp(
     torch.save(model.state_dict(), os.path.join(output_dir, 'model.pth'))
 
     # Plot training and validation loss
-    plot_training_history(weighted_train_loss, weighted_val_loss, num_epochs)
+    plot_training_history(training_loss_history, validation_loss_history, num_epochs)
     plt.savefig(os.path.join(output_dir, 'training_validation_loss.png'))
 
     return model
