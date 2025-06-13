@@ -47,7 +47,10 @@ def train_mlp(
         nn.Sigmoid()  # Sigmoid activation for binary classification
     )
 
-    loss_fn = nn.BCELoss()  # Binary Cross-Entropy Loss
+    # Binary Cross-Entropy Loss
+    loss_fn = nn.BCELoss(reduction='none') # compute loss per sample
+
+    # Using Adam optimizer
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     # Training loop
@@ -67,6 +70,8 @@ def train_mlp(
 
     for epoch in range(num_epochs):
         model.train()
+        weighted_train_loss = 0.0
+        # Iterate over batches
         for X_batch, y_batch, w_batch in train_loader:
             # Move data to the appropriate device
             X_batch, y_batch, w_batch = X_batch.to(device), y_batch.to(device), w_batch.to(device)
@@ -81,14 +86,19 @@ def train_mlp(
             weighted_loss.backward()
             optimizer.step()
 
+            weighted_train_loss += weighted_loss
+
+        weighted_train_loss = weighted_train_loss.detach().item() / len(train_loader)  # Average loss over batches
+
         # Validation step
         model.eval()
         with torch.no_grad():
             val_outputs = model(X_val_tensor).squeeze()
             val_loss = loss_fn(val_outputs, y_val_tensor.float())
             weighted_val_loss = (val_loss * w_val_tensor).mean()  # Apply weights to the loss
+            weighted_val_loss = weighted_val_loss.detach().item()  # Convert to scalar
 
-        print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {weighted_loss.detach().item():.8f}, Validation Loss: {weighted_val_loss.detach().item():.8f}")
+        print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {weighted_train_loss:.8f}, Validation Loss: {weighted_val_loss:.8f}")
 
     training_time = time.time() - starting_time
     print(f"Training time: {training_time} seconds")
@@ -97,7 +107,7 @@ def train_mlp(
     torch.save(model.state_dict(), os.path.join(output_dir, 'model.pth'))
 
     # Plot training and validation loss
-    plot_training_history(weighted_loss, weighted_val_loss, num_epochs)
+    plot_training_history(weighted_train_loss, weighted_val_loss, num_epochs)
     plt.savefig(os.path.join(output_dir, 'training_validation_loss.png'))
 
     return model
