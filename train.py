@@ -55,24 +55,24 @@ X_train, X_val, X_test, y_train, y_val, y_test, w_train, w_val, w_test = preproc
 # Boosted decision trees
 do_bdt = True
 if do_bdt:
-    from bdt import train_bdt, evaluate_bdt, feature_importance, feature_permutation, plot_learning_curve, hyperparameter_tuning
+    import bdt as mybdt
     outdir_bdt = 'bdt'
 
     # Train the BDT model
-    bdt = train_bdt(X_train, y_train, w_train, output_dir=outdir_bdt)
+    bdt = mybdt.train_bdt(X_train, y_train, w_train, output_dir=outdir_bdt)
 
     # Evaluate the BDT model
-    evaluate_bdt(bdt, X_train, X_test, y_train, y_test, w_train, w_test, output_dir=outdir_bdt)
+    mybdt.evaluate_bdt(bdt, X_train, X_test, y_train, y_test, w_train, w_test, output_dir=outdir_bdt)
 
     # Feature importance
-    feature_importance(bdt, dataset_train.columns, output_dir=outdir_bdt)
-    feature_permutation(bdt, dataset_train.columns, X_test, y_test, w_test, output_dir=outdir_bdt)
+    mybdt.feature_importance(bdt, dataset_train.columns, output_dir=outdir_bdt)
+    mybdt.feature_permutation(bdt, dataset_train.columns, X_test, y_test, w_test, output_dir=outdir_bdt)
 
     # Learning curve
-    plot_learning_curve(X_train, y_train, w_train, output_dir=outdir_bdt)
+    mybdt.plot_learning_curve(X_train, y_train, w_train, output_dir=outdir_bdt)
 
     # Hyperparameter tuning
-    hyperparameter_tuning(X_train, y_train, w_train, X_test, y_test, w_test)
+    mybdt.hyperparameter_tuning(X_train, y_train, w_train, X_test, y_test, w_test)
 
     # %%% Exercise %%%
     # Hyperparameter tuning:
@@ -88,10 +88,17 @@ if do_bdt:
 # Neural network
 do_nn = True
 if do_nn:
-    from mlp import train_mlp, evaluate_mlp
+    import mlp as mynn
     outdir_mlp = 'mlp'
-    mlp = train_mlp(X_train, X_val, y_train, y_val, w_train, w_val, output_dir=outdir_mlp)
-    evaluate_mlp(mlp, X_train, X_test, y_train, y_test, w_train, w_test, output_dir=outdir_mlp)
+
+    # Train the neural network
+    mlp = mynn.train_mlp(X_train, X_val, y_train, y_val, w_train, w_val, output_dir=outdir_mlp)
+
+    # Evaluate the neural network
+    mynn.evaluate_mlp(mlp, X_train, X_test, y_train, y_test, w_train, w_test, output_dir=outdir_mlp)
+
+    # Feature importance
+    mynn.feature_importance(mlp, dataset_train.columns, X_test, y_test, w_test, output_dir=outdir_mlp)
 
 # %%% Exercise %%%
 # Compare the performance of different models:
