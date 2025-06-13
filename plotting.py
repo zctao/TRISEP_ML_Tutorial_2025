@@ -53,8 +53,8 @@ def plot_correlations(features_df, target):
 
 def plot_training_history(training_loss, validation_loss, num_epochs):
     plt.figure()
-    plt.plot(range(1, num_epochs + 1), [training_loss.item()] * num_epochs, label='Training Loss')
-    plt.plot(range(1, num_epochs + 1), [validation_loss.item()] * num_epochs, label='Validation Loss')
+    plt.plot(range(1, num_epochs + 1), [training_loss.detach().item()] * num_epochs, label='Training Loss')
+    plt.plot(range(1, num_epochs + 1), [validation_loss.detach().item()] * num_epochs, label='Validation Loss')
     
     plt.title('Training and Validation Loss')
     plt.xlabel('Epoch')
